@@ -1,0 +1,221 @@
+package tree;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class BST {
+	
+	static class Node{
+		int data;
+		Node left;
+		Node right;
+		Node(int data){
+			super();
+			this.data = data;
+		}
+		public String toString(){
+			return String.valueOf(data);
+		}
+	}
+	
+	static Node root = null;
+	
+	public static boolean add(Node root, int value){
+		if(root.left==null && root.data>=value){
+			root.left = new Node(value);
+			return true;
+		}
+		if(root.right==null && root.data<value){
+			root.right = new Node(value);
+			return true;
+		}
+		if(value<=root.data){
+			return add(root.left,value);
+		}
+		if(value>root.data){
+			return add(root.right,value);
+		}
+		return false;
+	}
+	
+	public static int depth(Node root){
+		if(root == null)
+			return 0;
+		return 1+Math.max(depth(root.left), depth(root.right));
+	}
+
+	public static boolean add(int value){
+		if(root==null){
+			root = new Node(value);
+			return true;
+		}
+		return add(root,value);
+	}
+	
+	public static boolean search(Node root, int data){
+		if(root.data == data){
+			return true;
+		}
+		if(data<=root.data && root.left!=null){
+			return search(root.left,data);
+		}
+		if(data>root.data && root.right!=null){
+			return search(root.right,data);
+		}
+		return false;
+	}
+	
+	public static void display(Node root){
+		Queue<Node> line = new LinkedList<>();
+		Queue<Node> children = new LinkedList<>();
+		line.add(root);
+		while(line.size()!=0){
+			while(line.size()!=0){
+				Node temp = line.remove();
+				if(temp.left!=null)
+					children.add(temp.left);
+				if(temp.right!=null)
+					children.add(temp.right);
+				System.out.println(temp+" --> "+temp.left+" , "+temp.right);
+			}
+			line = children;
+			children = new LinkedList<>();
+		}	
+	}
+	
+	public static ArrayList<Integer> sort(Node root){
+		if(root==null)
+			return new ArrayList<>();
+		ArrayList<Integer> ans = new ArrayList<>();
+		if(root.left!=null)
+			ans.addAll(sort(root.left));
+		ans.add(root.data);
+		if(root.right!=null)
+			ans.addAll(sort(root.right));
+		return ans;
+	}
+	
+	public static int distanceBetweenNodes(Node root, int a, int b){
+		ArrayList<Integer> pathA = nodeToRootPath(root,a);
+		ArrayList<Integer> pathB = nodeToRootPath(root,b);
+		int i = pathA.size();
+		int j = pathB.size();
+		if(i==0 || j==0)
+			return -1;
+		while(i!=0 && j!=0 && pathA.get(i-1)==pathB.get(j-1)){
+			i--;
+			j--;
+		}
+		return i+j;
+	}
+	
+	public static ArrayList<Integer> nodeToRootPath(Node root, int data){
+		ArrayList<Integer> list = new ArrayList<>();
+		if(root==null){
+			return new ArrayList<>();
+		}
+		if(root.data==data){
+			list.add(data);
+			return list;
+		}
+		if(data<=root.data){
+			list.addAll(nodeToRootPath(root.left,data));
+			if(list.size()!=0){
+				list.add(root.data);
+			}
+		}
+		if(data>root.data){
+			list.addAll(nodeToRootPath(root.right,data));
+			if(list.size()!=0){
+				list.add(root.data);
+			}
+		}
+		return list;
+	}
+	
+	public static void put(Node root,int x, int y, int arr[][], int left, int right){
+		if(root!= null)
+			arr[x][y] = root.data;
+		if(root.left!=null)
+			put(root.left,x+1,(left+y)/2,arr,0,y);
+		if(root.right!=null)
+			put(root.right,x+1,(y+right)/2,arr,y,right);
+	}
+	
+	public static void structure(Node root){
+		int row = depth(root);
+		int col = (int) (Math.pow(2,row-1)+Math.pow(2, row-2));
+		int arr[][] = new int[row][col];
+		int y = (col-1)/2;
+		put(root,0,y,arr,0,col-1);
+		for(int i=0;i<row;i++){
+			for(int j=0;j<col;j++){
+				if(arr[i][j]==0)
+					System.out.print("   ");
+				else
+					System.out.print(" "+arr[i][j]+" ");
+			}
+			System.out.println();
+			System.out.println();
+		}
+	}
+	
+	public static void main(String [] args){
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Enter n when done entering");
+		try{
+			while(true){
+				add(sc.nextInt());
+			}
+		}catch(Exception e){
+			System.out.println("Finish Entering");
+		}
+		display(root);
+		System.out.println(search(root,210));
+		System.out.println(sort(root));
+		System.out.println(nodeToRootPath(root,10));
+		System.out.println(distanceBetweenNodes(root, 40, 90));
+		System.out.println("Depth is "+depth(root));
+		structure(root);
+		sc.close();
+	}
+	
+}
+
+
+//OUTPUT
+/*
+Enter n when done entering
+100 50 150 10 80 186 40 90 105 190 85 95 187 n
+Finish Entering
+100 --> 50 , 150
+50 --> 10 , 80
+150 --> 105 , 186
+10 --> null , 40
+80 --> null , 90
+105 --> null , null
+186 --> null , 190
+40 --> null , null
+90 --> 85 , 95
+190 --> 187 , null
+85 --> null , null
+95 --> null , null
+187 --> null , null
+false
+[10, 40, 50, 80, 85, 90, 95, 100, 105, 150, 186, 187, 190]
+[10, 50, 100]
+4
+Depth is 5
+                                  100                                     
+
+                50                                   150                   
+
+       10                 80                 105                 186          
+
+          40                 90                                   190       
+
+                         85     95                             187          
+
+*/
